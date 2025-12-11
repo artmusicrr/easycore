@@ -1,0 +1,121 @@
+# ================================
+# EasyCore - Docker Compose
+# Backend Next.js + PostgreSQL 15
+# ================================
+
+version: '3.8'
+
+services:
+  # --------------------------------
+  # PostgreSQL Database
+  # --------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: easycore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: adm
+      POSTGRES_PASSWORD: easysoft
+      POSTGRES_DB: db_easy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - easycore-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U adm -d db_easy" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------
+  # EasyCore Backend (Next.js)
+  # --------------------------------
+  easycore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: easycore-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: adm
+      DB_PASSWORD: easysoft
+      DB_DATABASE: db_easy
+      DB_SCHEMA: easy
+      DATABASE_URL: postgresql://adm:easysoft@postgres:5432/db_easy?schema=easy
+      JWT_SECRET: ${JWT_SECRET:-easycore_jwt_secret_change_in_production}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-32_char_encryption_key_here!!}
+    ports:
+      - "3000:3000"
+    networks:
+      - easycore-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # --------------------------------
+  # EasyCore Dev (para desenvolvimento)
+  # --------------------------------
+  easycore-dev:
+    image: node:20-alpine
+    container_name: easycore-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: adm
+      DB_PASSWORD: easysoft
+      DB_DATABASE: db_easy
+      DB_SCHEMA: easy
+      DATABASE_URL: postgresql://adm:easysoft@postgres:5432/db_easy?schema=easy
+      JWT_SECRET: dev_jwt_secret_123
+      ENCRYPTION_KEY: dev_encryption_key_32chars!!
+    ports:
+      - "3000:3000"
+    networks:
+      - easycore-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm install && npx prisma generate && npm run dev"
+    profiles:
+      - dev
+
+  # --------------------------------
+  # pgAdmin - Database Management
+  # --------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: easycore-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - easycore-network
+    depends_on:
+      - postgres
+
+networks:
+  easycore-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local

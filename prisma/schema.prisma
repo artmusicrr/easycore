@@ -1,0 +1,180 @@
+// ================================
+// EasyCore - Prisma Schema
+// Schema: easy
+// ================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["easy"]
+}
+
+// --------------------------------
+// Usuários do Sistema
+// --------------------------------
+model User {
+  id               String   @id @default(uuid())
+  nome             String
+  email            String   @unique
+  senha_hash       String
+  role             Role     @default(recepcao)
+  two_factor_secret String?
+  two_factor_enabled Boolean @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // Relações
+  treatments_as_dentist Treatment[] @relation("DentistaTreatments")
+  payments_received     Payment[]   @relation("ReceivedPayments")
+  audit_logs            AuditLog[]
+
+  @@map("users")
+  @@schema("easy")
+}
+
+enum Role {
+  recepcao
+  dentista
+  admin
+
+  @@schema("easy")
+}
+
+// --------------------------------
+// Pacientes
+// --------------------------------
+model Patient {
+  id                String   @id @default(uuid())
+  nome              String
+  telefone          String?
+  cpf_encrypted     String   @unique // CPF criptografado
+  email             String?  @unique
+  data_cadastro     DateTime @default(now())
+  consentimento_lgpd Boolean @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relações
+  treatments Treatment[]
+
+  @@map("patients")
+  @@schema("easy")
+}
+
+// --------------------------------
+// Tratamentos
+// --------------------------------
+model Treatment {
+  id                   String          @id @default(uuid())
+  patient_id           String
+  dentista_id          String
+  descricao            String
+  valor_total          Decimal         @db.Decimal(10, 2)
+  valor_pago_total     Decimal         @default(0) @db.Decimal(10, 2)
+  data_inicio          DateTime        @default(now())
+  data_fim             DateTime?
+  status               TreatmentStatus @default(aberto)
+  risco_inadimplencia  Float?          // Placeholder para IA (0.0 a 1.0)
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+
+  // Relações
+  patient  Patient            @relation(fields: [patient_id], references: [id])
+  dentista User               @relation("DentistaTreatments", fields: [dentista_id], references: [id])
+  payments Payment[]
+  sessions TreatmentSession[]
+
+  @@map("treatments")
+  @@schema("easy")
+}
+
+enum TreatmentStatus {
+  aberto
+  pago
+  atrasado
+
+  @@schema("easy")
+}
+
+// --------------------------------
+// Pagamentos
+// --------------------------------
+model Payment {
+  id               String        @id @default(uuid())
+  treatment_id     String
+  valor_pago       Decimal       @db.Decimal(10, 2)
+  data             DateTime      @default(now())
+  forma_pagamento  PaymentMethod
+  recebido_por_id  String
+  comprovante_url  String?
+  observacao       String?
+  created_at       DateTime      @default(now())
+
+  // Relações
+  treatment    Treatment @relation(fields: [treatment_id], references: [id])
+  recebido_por User      @relation("ReceivedPayments", fields: [recebido_por_id], references: [id])
+
+  @@map("payments")
+  @@schema("easy")
+}
+
+enum PaymentMethod {
+  PIX
+  cartao_credito
+  cartao_debito
+  dinheiro
+  boleto
+  transferencia
+
+  @@schema("easy")
+}
+
+// --------------------------------
+// Sessões de Tratamento (opcional)
+// --------------------------------
+model TreatmentSession {
+  id           String        @id @default(uuid())
+  treatment_id String
+  nome_sessao  String
+  data         DateTime
+  status       SessionStatus @default(agendada)
+  valor_sessao Decimal?      @db.Decimal(10, 2)
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+
+  // Relações
+  treatment Treatment @relation(fields: [treatment_id], references: [id])
+
+  @@map("treatment_sessions")
+  @@schema("easy")
+}
+
+enum SessionStatus {
+  agendada
+  realizada
+  cancelada
+
+  @@schema("easy")
+}
+
+// --------------------------------
+// Logs de Auditoria (Imutáveis)
+// --------------------------------
+model AuditLog {
+  id        String   @id @default(uuid())
+  user_id   String
+  acao      String
+  timestamp DateTime @default(now())
+  detalhes  Json?
+
+  // Relações
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("audit_logs")
+  @@schema("easy")
+}

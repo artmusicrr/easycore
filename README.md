@@ -95,7 +95,7 @@ npx prisma db seed
 
 ### Credenciais pgAdmin
 
-- **Email:** `admin@admin`
+- **Email:** `admin@admin.com`
 - **Senha:** `admin`
 
 ### Conexão PostgreSQL (no pgAdmin)

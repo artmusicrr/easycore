@@ -4,11 +4,12 @@
 // ================================
 
 import prisma from './prisma';
+import { Prisma } from '@prisma/client';
 
 export interface AuditLogData {
   userId: string;
   acao: string;
-  detalhes?: Record<string, unknown>;
+  detalhes?: Prisma.InputJsonValue;
 }
 
 /**
@@ -20,7 +21,7 @@ export async function createAuditLog(data: AuditLogData): Promise<void> {
       data: {
         user_id: data.userId,
         acao: data.acao,
-        detalhes: data.detalhes || null,
+        detalhes: data.detalhes,
       },
     });
   } catch (error) {

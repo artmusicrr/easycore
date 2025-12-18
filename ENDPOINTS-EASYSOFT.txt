@@ -1,0 +1,413 @@
+POST: http://localhost:4003/api/auth/login
+
+{
+  "email": "admin@easycore.com",
+  "senha": "Admin@123"
+}
+
+Resposta:
+{
+	"message": "Login realizado com sucesso",
+	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MTU2MzE0Ni03M2YxLTQwM2UtOTAyNi05ODcyODZmOTQ1ZTQiLCJlbWFpbCI6ImFkbWluQGVhc3ljb3JlLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2NTUzNDU1NCwiZXhwIjoxNzY1NjIwOTU0fQ.PH36SOiIYUD1g7gOa-dUYh0dReejnh0rFpO-9RgoUHI",
+	"user": {
+		"id": "51563146-73f1-403e-9026-987286f945e4",
+		"nome": "Administrador",
+		"email": "admin@easycore.com",
+		"role": "admin"
+	}
+}
+
+_____________________________________________________________
+POST: http://localhost:4003/api/users/register
+
+{
+  "nome": "Recepção User",
+  "email": "recepcao@example.com",
+  "senha": "Password123",
+  "role": "recepcao" 
+}
+
+Resposta: 
+{
+	"message": "Usuário criado com sucesso",
+	"user": {
+		"id": "01c3add7-4bd5-47a2-ae49-eeea7c645ea5",
+		"nome": "New User",
+		"email": "newuser@example.com",
+		"role": "recepcao",
+		"created_at": "2025-12-12T10:16:32.977Z"
+	}
+}
+
+_______________________________________________________________
+POST: http://localhost:4003/api/patients
+
+{
+  "nome": "Reginaldo Rodrigues",
+  "cpf": "140.670.748-16",
+  "telefone": "11999999999",
+  "email": "artmusic@msn.com",
+  "consentimento_lgpd": true
+}
+
+HEADERS:
+x-user-id: [UUID of user]
+
+Resposta:
+{
+	"message": "Paciente cadastrado com sucesso",
+	"patient": {
+		"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"nome": "Reginaldo Rodrigues",
+		"telefone": "11999999999",
+		"email": "artmusic@msn.com",
+		"consentimento_lgpd": true,
+		"data_cadastro": "2025-12-12T10:17:00.879Z"
+	}
+}
+_______________________________________________________________
+POST: http://localhost:4003/api/treatments
+
+{
+  "patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+  "dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+  "descricao": "Root Canal",
+  "valor_total": 500.00,
+  "data_inicio": "2023-12-01T10:00:00Z"
+}
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"message": "Tratamento criado com sucesso",
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+		"descricao": "Root Canal",
+		"valor_total": "500",
+		"valor_pago_total": "0",
+		"data_inicio": "2023-12-01T10:00:00.000Z",
+		"data_fim": null,
+		"status": "aberto",
+		"risco_inadimplencia": 0.5,
+		"created_at": "2025-12-12T10:20:03.882Z",
+		"updated_at": "2025-12-12T10:20:03.882Z",
+		"patient": {
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues",
+			"email": "artmusic@msn.com"
+		},
+		"dentista": {
+			"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"nome": "Dr. João Oliveira"
+		}
+	}
+}
+
+_________________________________________________________
+GET: http://localhost:4003/api/treatments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+		"descricao": "Root Canal",
+		"valor_total": "500",
+		"valor_pago_total": "0",
+		"data_inicio": "2023-12-01T10:00:00.000Z",
+		"data_fim": null,
+		"status": "aberto",
+		"risco_inadimplencia": 0.7999999999999999,
+		"created_at": "2025-12-12T10:20:03.882Z",
+		"updated_at": "2025-12-12T10:20:03.900Z",
+		"patient": {
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues",
+			"telefone": "11999999999",
+			"email": "artmusic@msn.com",
+			"consentimento_lgpd": true
+		},
+		"dentista": {
+			"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"nome": "Dr. João Oliveira",
+			"email": "joao.dentista@easycore.com"
+		},
+		"payments": [],
+		"sessions": [],
+		"financeiro": {
+			"valorTotal": 500,
+			"valorPago": 0,
+			"saldoDevedor": 500,
+			"percentualPago": 0
+		},
+		"risco": {
+			"score": 0.7999999999999999,
+			"nivel": "critico"
+		}
+	}
+}
+
+______________________________________________________________________
+POST: http://localhost:4003/api/payments
+{
+  "treatment_id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+  "valor_pago": 100.00,
+  "forma_pagamento": "PIX",
+  "observacao": "Partial payment"
+}
+
+HEADERS:
+x-user-id: [UUID of user]
+
+Resposta:
+{
+	"message": "Pagamento registrado com sucesso",
+	"payment": {
+		"id": "9fcc2313-ea66-4175-bf7f-e68df14f3473",
+		"treatment_id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"valor_pago": "100",
+		"data": "2025-12-12T10:22:17.124Z",
+		"forma_pagamento": "PIX",
+		"recebido_por_id": "51563146-73f1-403e-9026-987286f945e4",
+		"comprovante_url": null,
+		"observacao": "Partial payment",
+		"created_at": "2025-12-12T10:22:17.124Z",
+		"treatment": {
+			"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+			"descricao": "Root Canal",
+			"valor_total": "500"
+		},
+		"recebido_por": {
+			"id": "51563146-73f1-403e-9026-987286f945e4",
+			"nome": "Administrador"
+		}
+	},
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"valor_pago_total": 100,
+		"valor_total": 500,
+		"saldo_devedor": 400
+	}
+}
+
+____________________________________________________________________
+PUT: http://localhost:4003/api/treatments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+{
+  "descricao": "Updated Description",
+  "valor_total": 600.00,
+  "status": "aberto"
+}
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+
+Resposta:
+{
+	"message": "Tratamento atualizado com sucesso",
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+		"descricao": "Updated Description",
+		"valor_total": "600",
+		"valor_pago_total": "100",
+		"data_inicio": "2023-12-01T10:00:00.000Z",
+		"data_fim": null,
+		"status": "aberto",
+		"risco_inadimplencia": 0.7075,
+		"created_at": "2025-12-12T10:20:03.882Z",
+		"updated_at": "2025-12-12T10:23:35.450Z",
+		"patient": {
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues"
+		},
+		"dentista": {
+			"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"nome": "Dr. João Oliveira"
+		}
+	}
+}
+
+___________________________________________________________
+GET: http://localhost:4003/api/patients
+
+HEADERS:
+x-user-id: [UUID of user]
+
+Resposta:
+{
+	"patients": [
+		{
+			"id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+			"nome": "Carlos Oliveira",
+			"telefone": "(11) 99999-9999",
+			"email": "paciente@email.com",
+			"data_cadastro": "2025-12-11T18:41:22.195Z",
+			"consentimento_lgpd": true,
+			"_count": {
+				"treatments": 1
+			}
+		},
+		{
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues",
+			"telefone": "11999999999",
+			"email": "artmusic@msn.com",
+			"data_cadastro": "2025-12-12T10:17:00.879Z",
+			"consentimento_lgpd": true,
+			"_count": {
+				"treatments": 1
+			}
+		}
+	],
+	"pagination": {
+		"page": 1,
+		"limit": 20,
+		"total": 2,
+		"totalPages": 1
+	}
+}
+
+___________________________________________________________
+GET: http://localhost:4003/api/health
+
+Resposta:
+{
+	"status": "healthy",
+	"timestamp": "2025-12-12T10:23:53.994Z",
+	"database": "connected",
+	"version": "1.0.0"
+}
+
+__________________________________________________________
+GET: http://localhost:4003/api/treatments
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatments": [
+		{
+			"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+			"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"descricao": "Updated Description",
+			"valor_total": "600",
+			"valor_pago_total": "100",
+			"data_inicio": "2023-12-01T10:00:00.000Z",
+			"data_fim": null,
+			"status": "aberto",
+			"risco_inadimplencia": 0.7075,
+			"created_at": "2025-12-12T10:20:03.882Z",
+			"updated_at": "2025-12-12T10:23:35.450Z",
+			"patient": {
+				"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+				"nome": "Reginaldo Rodrigues"
+			},
+			"dentista": {
+				"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+				"nome": "Dr. João Oliveira"
+			}
+		},
+		{
+			"id": "seed-treatment-001",
+			"patient_id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+			"dentista_id": "2d627b9d-eaae-40dc-8d73-8ef70f98f3a6",
+			"descricao": "Tratamento ortodôntico completo",
+			"valor_total": "5000",
+			"valor_pago_total": "1000",
+			"data_inicio": "2025-12-11T18:41:22.201Z",
+			"data_fim": null,
+			"status": "aberto",
+			"risco_inadimplencia": 0.15,
+			"created_at": "2025-12-11T18:41:22.201Z",
+			"updated_at": "2025-12-11T18:41:22.201Z",
+			"patient": {
+				"id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+				"nome": "Carlos Oliveira"
+			},
+			"dentista": {
+				"id": "2d627b9d-eaae-40dc-8d73-8ef70f98f3a6",
+				"nome": "Dr. João Silva"
+			}
+		}
+	],
+	"pagination": {
+		"page": 1,
+		"limit": 20,
+		"total": 2,
+		"totalPages": 1
+	}
+}
+
+__________________________________________________________
+GET: http://localhost:4003/api/payments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"status": "aberto",
+		"valorTotal": 600,
+		"valorPago": 100,
+		"saldoDevedor": 500,
+		"percentualPago": 16.67
+	},
+	"payments": [
+		{
+			"id": "9fcc2313-ea66-4175-bf7f-e68df14f3473",
+			"treatment_id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+			"valor_pago": "100",
+			"data": "2025-12-12T10:22:17.124Z",
+			"forma_pagamento": "PIX",
+			"recebido_por_id": "51563146-73f1-403e-9026-987286f945e4",
+			"comprovante_url": null,
+			"observacao": "Partial payment",
+			"created_at": "2025-12-12T10:22:17.124Z",
+			"recebido_por": {
+				"id": "51563146-73f1-403e-9026-987286f945e4",
+				"nome": "Administrador"
+			}
+		}
+	],
+	"resumo": {
+		"total_pagamentos": 1,
+		"por_forma_pagamento": {
+			"PIX": {
+				"quantidade": 1,
+				"total": 100
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+

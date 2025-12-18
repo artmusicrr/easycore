@@ -12,7 +12,7 @@
    - Popular dados iniciais: `npx prisma db seed`
 3. **Iniciar Aplicação**
    - Executar: `npm run dev`
-   - Acessar: [http://localhost:4003](http://localhost:4003)
+   - Acessar: [http://localhost:3333](http://localhost:3333)
 
 ### Acesso ao Banco
 

@@ -1,0 +1,562 @@
+POST: http://localhost:4003/api/auth/login
+
+{
+  "email": "admin@easycore.com",
+  "senha": "Admin@123"
+}
+
+Resposta:
+{
+	"message": "Login realizado com sucesso",
+	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MTU2MzE0Ni03M2YxLTQwM2UtOTAyNi05ODcyODZmOTQ1ZTQiLCJlbWFpbCI6ImFkbWluQGVhc3ljb3JlLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2NTUzNDU1NCwiZXhwIjoxNzY1NjIwOTU0fQ.PH36SOiIYUD1g7gOa-dUYh0dReejnh0rFpO-9RgoUHI",
+	"user": {
+		"id": "51563146-73f1-403e-9026-987286f945e4",
+		"nome": "Administrador",
+		"email": "admin@easycore.com",
+		"role": "admin"
+	}
+}
+
+_____________________________________________________________
+POST: http://localhost:4003/api/users/register
+
+[
+  {
+    "nome": "Admin Master",
+    "email": "admin@example.com",
+    "senha": "Password123",
+    "role": "admin"
+  },
+  {
+    "nome": "Admin Secundário",
+    "email": "admin2@example.com",
+    "senha": "Password123",
+    "role": "admin"
+  },
+  {
+    "nome": "Recepção Principal",
+    "email": "recepcao1@example.com",
+    "senha": "Password123",
+    "role": "recepcao"
+  },
+  {
+    "nome": "Recepção Backup",
+    "email": "recepcao2@example.com",
+    "senha": "Password123",
+    "role": "recepcao"
+  },
+  {
+    "nome": "Dentista Carlos",
+    "email": "carlos.dentista@example.com",
+    "senha": "Password123",
+    "role": "dentista"
+  },
+  {
+    "nome": "Dentista Ana",
+    "email": "ana.dentista@example.com",
+    "senha": "Password123",
+    "role": "dentista"
+  },
+  {
+    "nome": "Dentista Rafael",
+    "email": "rafael.dentista@example.com",
+    "senha": "Password123",
+    "role": "dentista"
+  },
+  {
+    "nome": "Cliente Marcos",
+    "email": "marcos.cliente@example.com",
+    "senha": "Password123"
+  },
+  {
+    "nome": "Cliente Juliana",
+    "email": "juliana.cliente@example.com",
+    "senha": "Password123"
+  },
+  {
+    "nome": "Cliente Fernanda",
+    "email": "fernanda.cliente@example.com",
+    "senha": "Password123"
+  }
+]
+
+
+_______________________________________________________________
+POST: http://localhost:4003/api/patients
+
+[
+  {
+    "nome": "Reginaldo Rodrigues",
+    "cpf": "645.228.460-61",
+    "telefone": "11999999999",
+    "email": "artmusic@msn.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Juliana Martins",
+    "cpf": "991.893.170-17",
+    "telefone": "11988887777",
+    "email": "juliana.martins@gmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Carlos Eduardo Silva",
+    "cpf": "043.761.240-60",
+    "telefone": "11977776666",
+    "email": "carlos.silva@hotmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Fernanda Oliveira",
+    "cpf": "999.653.290-95",
+    "telefone": "11966665555",
+    "email": "fernanda.oliveira@yahoo.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Marcos Vinícius Lima",
+    "cpf": "168.884.140-78",
+    "telefone": "11955554444",
+    "email": "marcos.lima@gmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Ana Paula Costa",
+    "cpf": "455.592.120-83",
+    "telefone": "11944443333",
+    "email": "ana.costa@gmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Rafael Pereira",
+    "cpf": "426.033.220-10",
+    "telefone": "11933332222",
+    "email": "rafael.pereira@outlook.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Patrícia Nogueira",
+    "cpf": "834.924.630-88",
+    "telefone": "11922221111",
+    "email": "patricia.nogueira@gmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Lucas Almeida",
+    "cpf": "551.509.820-08",
+    "telefone": "11911112222",
+    "email": "lucas.almeida@gmail.com",
+    "consentimento_lgpd": true
+  },
+  {
+    "nome": "Camila Rocha",
+    "cpf": "767.732.400-26",
+    "telefone": "11900009999",
+    "email": "camila.rocha@hotmail.com",
+    "consentimento_lgpd": true
+  }
+]
+
+
+_______________________________________________________________
+POST: http://localhost:4003/api/treatments
+
+[
+  {
+    "patient_id": "a97c4d14-b06c-4ed7-b859-6d42d950edde",
+    "dentista_id": "02fd80d9-3b93-4260-8c3d-f2546c903b46",
+    "descricao": "Avaliação inicial",
+    "valor_total": 150.00,
+    "data_inicio": "2025-12-19T09:00:00Z"
+  },
+  {
+    "patient_id": "51314707-c215-4032-a38d-afea74a83cfb",
+    "dentista_id": "acca00a3-4486-487e-b9c1-7cc8e1231590",
+    "descricao": "Limpeza e profilaxia",
+    "valor_total": 200.00,
+    "data_inicio": "2025-12-19T10:30:00Z"
+  },
+  {
+    "patient_id": "8a64a2b5-b196-4bed-8d36-5a16c0bfe9e2",
+    "dentista_id": "58d03635-5e73-41a4-904d-e5603404b004",
+    "descricao": "Restauração simples",
+    "valor_total": 250.00,
+    "data_inicio": "2025-12-20T14:00:00Z"
+  },
+  {
+    "patient_id": "b3ebf4ce-b384-41cc-a4d7-5b76085966d6",
+    "dentista_id": "02fd80d9-3b93-4260-8c3d-f2546c903b46",
+    "descricao": "Extração dentária",
+    "valor_total": 300.00,
+    "data_inicio": "2025-12-20T11:00:00Z"
+  },
+  {
+    "patient_id": "70fe70bb-c08e-44df-a6c7-98676f298fda",
+    "dentista_id": "acca00a3-4486-487e-b9c1-7cc8e1231590",
+    "descricao": "Clareamento dental",
+    "valor_total": 800.00,
+    "data_inicio": "2025-12-21T15:00:00Z"
+  },
+  {
+    "patient_id": "269ef50c-b74d-41b6-85a4-0c4d782d9a50",
+    "dentista_id": "58d03635-5e73-41a4-904d-e5603404b004",
+    "descricao": "Tratamento de canal",
+    "valor_total": 500.00,
+    "data_inicio": "2025-12-22T09:30:00Z"
+  },
+  {
+    "patient_id": "99680256-9cf6-41f7-b830-bdaeffb0ade3",
+    "dentista_id": "02fd80d9-3b93-4260-8c3d-f2546c903b46",
+    "descricao": "Instalação de aparelho ortodôntico",
+    "valor_total": 1200.00,
+    "data_inicio": "2025-12-23T16:00:00Z"
+  },
+  {
+    "patient_id": "daba338e-f0d7-451a-81cf-c4cca971ed3e",
+    "dentista_id": "acca00a3-4486-487e-b9c1-7cc8e1231590",
+    "descricao": "Manutenção ortodôntica",
+    "valor_total": 180.00,
+    "data_inicio": "2025-12-24T10:00:00Z"
+  },
+  {
+    "patient_id": "a6408ac9-9d9d-49bb-929e-d85c6ac7d1e9",
+    "dentista_id": "58d03635-5e73-41a4-904d-e5603404b004",
+    "descricao": "Implante dentário",
+    "valor_total": 2500.00,
+    "data_inicio": "2025-12-26T13:30:00Z"
+  },
+  {
+    "patient_id": "ebe99c17-d7a5-444a-9769-e03d42af0750",
+    "dentista_id": "02fd80d9-3b93-4260-8c3d-f2546c903b46",
+    "descricao": "Revisão e acompanhamento",
+    "valor_total": 120.00,
+    "data_inicio": "2025-12-27T09:00:00Z"
+  }
+]
+
+_________________________________________________________
+GET: http://localhost:4003/api/treatments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+		"descricao": "Root Canal",
+		"valor_total": "500",
+		"valor_pago_total": "0",
+		"data_inicio": "2023-12-01T10:00:00.000Z",
+		"data_fim": null,
+		"status": "aberto",
+		"risco_inadimplencia": 0.7999999999999999,
+		"created_at": "2025-12-12T10:20:03.882Z",
+		"updated_at": "2025-12-12T10:20:03.900Z",
+		"patient": {
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues",
+			"telefone": "11999999999",
+			"email": "artmusic@msn.com",
+			"consentimento_lgpd": true
+		},
+		"dentista": {
+			"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"nome": "Dr. João Oliveira",
+			"email": "joao.dentista@easycore.com"
+		},
+		"payments": [],
+		"sessions": [],
+		"financeiro": {
+			"valorTotal": 500,
+			"valorPago": 0,
+			"saldoDevedor": 500,
+			"percentualPago": 0
+		},
+		"risco": {
+			"score": 0.7999999999999999,
+			"nivel": "critico"
+		}
+	}
+}
+
+______________________________________________________________________
+POST: http://localhost:4003/api/payments
+
+[
+  {
+    "treatment_id": "94bacf90-270e-4166-8a38-0b442bb6ebe6",
+    "valor_pago": 150.00,
+    "forma_pagamento": "PIX",
+    "observacao": "Pagamento integral via PIX"
+  },
+  {
+    "treatment_id": "12ac0bdb-16c1-4a16-ba08-45536a76c70b",
+    "valor_pago": 100.00,
+    "forma_pagamento": "cartao_credito",
+    "observacao": "Entrada no cartão de crédito"
+  },
+  {
+    "treatment_id": "87a34b5d-8ec2-4daa-b78a-e5554f237371",
+    "valor_pago": 250.00,
+    "forma_pagamento": "cartao_debito",
+    "observacao": "Pagamento à vista no débito"
+  },
+  {
+    "treatment_id": "e033a91c-79f0-405f-b7f2-d479edea69a4",
+    "valor_pago": 100.00,
+    "forma_pagamento": "dinheiro",
+    "observacao": "Pagamento em espécie"
+  },
+  {
+    "treatment_id": "b5281102-041f-4751-adfc-b88746add178",
+    "valor_pago": 300.00,
+    "forma_pagamento": "PIX",
+    "observacao": "Pagamento parcial"
+  },
+  {
+    "treatment_id": "280195ac-1259-4a8b-ad06-3741a7950f3e",
+    "valor_pago": 500.00,
+    "forma_pagamento": "boleto",
+    "observacao": "Pagamento via boleto bancário"
+  },
+  {
+    "treatment_id": "9085a752-4275-40b7-8f52-1f1444f7d7e0",
+    "valor_pago": 200.00,
+    "forma_pagamento": "transferencia",
+    "observacao": "Transferência bancária"
+  },
+  {
+    "treatment_id": "d0b702f6-b39c-4ea9-9db1-dd1d0b5f1127",
+    "valor_pago": 180.00,
+    "forma_pagamento": "cartao_credito",
+    "observacao": "Pagamento parcelado no crédito"
+  },
+  {
+    "treatment_id": "2a3ed772-b149-452c-ab1f-bf72c61cd4a9",
+    "valor_pago": 120.00,
+    "forma_pagamento": "dinheiro",
+    "observacao": "Pagamento na recepção"
+  },
+  {
+    "treatment_id": "104de595-3e62-428f-be88-ca5f45bee1af",
+    "valor_pago": 250.00,
+    "forma_pagamento": "PIX",
+    "observacao": "Pagamento inicial"
+  }
+]
+
+____________________________________________________________________
+PUT: http://localhost:4003/api/treatments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+{
+  "descricao": "Updated Description",
+  "valor_total": 600.00,
+  "status": "aberto"
+}
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+
+Resposta:
+{
+	"message": "Tratamento atualizado com sucesso",
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+		"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+		"descricao": "Updated Description",
+		"valor_total": "600",
+		"valor_pago_total": "100",
+		"data_inicio": "2023-12-01T10:00:00.000Z",
+		"data_fim": null,
+		"status": "aberto",
+		"risco_inadimplencia": 0.7075,
+		"created_at": "2025-12-12T10:20:03.882Z",
+		"updated_at": "2025-12-12T10:23:35.450Z",
+		"patient": {
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues"
+		},
+		"dentista": {
+			"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"nome": "Dr. João Oliveira"
+		}
+	}
+}
+
+___________________________________________________________
+GET: http://localhost:4003/api/patients
+
+HEADERS:
+x-user-id: [UUID of user]
+
+Resposta:
+{
+	"patients": [
+		{
+			"id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+			"nome": "Carlos Oliveira",
+			"telefone": "(11) 99999-9999",
+			"email": "paciente@email.com",
+			"data_cadastro": "2025-12-11T18:41:22.195Z",
+			"consentimento_lgpd": true,
+			"_count": {
+				"treatments": 1
+			}
+		},
+		{
+			"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"nome": "Reginaldo Rodrigues",
+			"telefone": "11999999999",
+			"email": "artmusic@msn.com",
+			"data_cadastro": "2025-12-12T10:17:00.879Z",
+			"consentimento_lgpd": true,
+			"_count": {
+				"treatments": 1
+			}
+		}
+	],
+	"pagination": {
+		"page": 1,
+		"limit": 20,
+		"total": 2,
+		"totalPages": 1
+	}
+}
+
+___________________________________________________________
+GET: http://localhost:4003/api/health
+
+Resposta:
+{
+	"status": "healthy",
+	"timestamp": "2025-12-12T10:23:53.994Z",
+	"database": "connected",
+	"version": "1.0.0"
+}
+
+__________________________________________________________
+GET: http://localhost:4003/api/treatments
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatments": [
+		{
+			"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+			"patient_id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+			"dentista_id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+			"descricao": "Updated Description",
+			"valor_total": "600",
+			"valor_pago_total": "100",
+			"data_inicio": "2023-12-01T10:00:00.000Z",
+			"data_fim": null,
+			"status": "aberto",
+			"risco_inadimplencia": 0.7075,
+			"created_at": "2025-12-12T10:20:03.882Z",
+			"updated_at": "2025-12-12T10:23:35.450Z",
+			"patient": {
+				"id": "4c43a726-97c5-44bd-99a7-3cad5538b8b4",
+				"nome": "Reginaldo Rodrigues"
+			},
+			"dentista": {
+				"id": "1f08fef6-993d-453f-b80b-ffb923ffa004",
+				"nome": "Dr. João Oliveira"
+			}
+		},
+		{
+			"id": "seed-treatment-001",
+			"patient_id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+			"dentista_id": "2d627b9d-eaae-40dc-8d73-8ef70f98f3a6",
+			"descricao": "Tratamento ortodôntico completo",
+			"valor_total": "5000",
+			"valor_pago_total": "1000",
+			"data_inicio": "2025-12-11T18:41:22.201Z",
+			"data_fim": null,
+			"status": "aberto",
+			"risco_inadimplencia": 0.15,
+			"created_at": "2025-12-11T18:41:22.201Z",
+			"updated_at": "2025-12-11T18:41:22.201Z",
+			"patient": {
+				"id": "7bb4a07f-1b58-4960-aa18-dab24a3a030d",
+				"nome": "Carlos Oliveira"
+			},
+			"dentista": {
+				"id": "2d627b9d-eaae-40dc-8d73-8ef70f98f3a6",
+				"nome": "Dr. João Silva"
+			}
+		}
+	],
+	"pagination": {
+		"page": 1,
+		"limit": 20,
+		"total": 2,
+		"totalPages": 1
+	}
+}
+
+__________________________________________________________
+GET: http://localhost:4003/api/payments/e8842c33-11a9-41a2-9de8-bdf3d659fec1
+
+HEADERS:
+x-user-id: [UUID of user]
+x-user-role: admin
+
+Resposta:
+{
+	"treatment": {
+		"id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+		"status": "aberto",
+		"valorTotal": 600,
+		"valorPago": 100,
+		"saldoDevedor": 500,
+		"percentualPago": 16.67
+	},
+	"payments": [
+		{
+			"id": "9fcc2313-ea66-4175-bf7f-e68df14f3473",
+			"treatment_id": "e8842c33-11a9-41a2-9de8-bdf3d659fec1",
+			"valor_pago": "100",
+			"data": "2025-12-12T10:22:17.124Z",
+			"forma_pagamento": "PIX",
+			"recebido_por_id": "51563146-73f1-403e-9026-987286f945e4",
+			"comprovante_url": null,
+			"observacao": "Partial payment",
+			"created_at": "2025-12-12T10:22:17.124Z",
+			"recebido_por": {
+				"id": "51563146-73f1-403e-9026-987286f945e4",
+				"nome": "Administrador"
+			}
+		}
+	],
+	"resumo": {
+		"total_pagamentos": 1,
+		"por_forma_pagamento": {
+			"PIX": {
+				"quantidade": 1,
+				"total": 100
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+

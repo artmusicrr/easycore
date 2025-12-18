@@ -1,6 +1,6 @@
 # EasyCore API - Documentação de Endpoints
 
-> **Base URL:** `http://localhost:4003`
+> **Base URL:** `http://localhost:3333`
 
 ---
 

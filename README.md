@@ -89,7 +89,7 @@ npx prisma db seed
 
 | Serviço | URL | Descrição |
 |---------|-----|-----------|
-| **API** | http://localhost:3000 | Backend Next.js |
+| **API** | http://localhost:3333 | Backend Next.js |
 | **pgAdmin** | http://localhost:5050 | Interface do banco |
 | **PostgreSQL** | localhost:5432 | Banco de dados |
 

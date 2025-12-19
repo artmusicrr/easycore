@@ -9,6 +9,18 @@ import prisma from '@/lib/prisma';
 import { createAuditLog, AUDIT_ACTIONS } from '@/lib/audit';
 import { updateTreatmentRisk } from '@/lib/risk';
 
+// Headers CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// Handler OPTIONS para CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 // Schema de validação
 const createTreatmentSchema = z.object({
   patient_id: z.string().uuid('ID do paciente inválido'),
@@ -217,7 +229,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    });
+    }, { headers: corsHeaders });
     
   } catch (error) {
     console.error('Erro ao listar tratamentos:', error);
@@ -229,7 +241,7 @@ export async function GET(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

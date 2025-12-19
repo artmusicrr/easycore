@@ -20,8 +20,20 @@ const adminRoutes = [
   '/api/audit-logs',
 ];
 
+// Headers CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Permitir requisições OPTIONS (CORS preflight) sem autenticação
+  if (request.method === 'OPTIONS') {
+    return NextResponse.json({}, { headers: corsHeaders });
+  }
 
   // Ignorar rotas que não são API
   if (!pathname.startsWith('/api')) {
@@ -43,7 +55,7 @@ export async function middleware(request: NextRequest) {
         error: 'Token de autenticação não fornecido',
         code: 'AUTH_TOKEN_MISSING',
       },
-      { status: 401 }
+      { status: 401, headers: corsHeaders }
     );
   }
 
@@ -55,7 +67,7 @@ export async function middleware(request: NextRequest) {
         error: 'Token inválido ou expirado',
         code: 'AUTH_TOKEN_INVALID',
       },
-      { status: 401 }
+      { status: 401, headers: corsHeaders }
     );
   }
 
@@ -67,7 +79,7 @@ export async function middleware(request: NextRequest) {
           error: 'Acesso negado. Requer permissão de administrador.',
           code: 'AUTH_ADMIN_REQUIRED',
         },
-        { status: 403 }
+        { status: 403, headers: corsHeaders }
       );
     }
   }

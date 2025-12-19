@@ -49,7 +49,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-easycore_jwt_secret_change_in_production}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-32_char_encryption_key_here!!}
     ports:
-      - "4003:3000"
+      - "4003:3333"
     networks:
       - easycore-network
     depends_on:

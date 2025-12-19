@@ -180,9 +180,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
     const patientId = searchParams.get('patient_id');
+    const search = searchParams.get('search');
     
     // Construir filtros
-    const where: Record<string, unknown> = {};
+    const where: Record<string, any> = {};
     
     // Dentistas só veem seus próprios tratamentos
     if (userRole === 'dentista') {
@@ -195,6 +196,17 @@ export async function GET(request: NextRequest) {
     
     if (patientId) {
       where.patient_id = patientId;
+    }
+
+    if (search) {
+      where.OR = [
+        { descricao: { contains: search, mode: 'insensitive' } },
+        { 
+          patient: { 
+            nome: { contains: search, mode: 'insensitive' } 
+          } 
+        }
+      ];
     }
     
     const [treatments, total] = await Promise.all([

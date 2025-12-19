@@ -9,6 +9,18 @@ import prisma from '@/lib/prisma';
 import { createAuditLog, AUDIT_ACTIONS } from '@/lib/audit';
 import { encrypt, isValidCPF } from '@/lib/crypto';
 
+// Headers CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// Handler OPTIONS para CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 // Schema de validação
 const createPatientSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -39,7 +51,7 @@ export async function POST(request: NextRequest) {
           error: 'Dados inválidos',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
     
@@ -117,7 +129,7 @@ export async function POST(request: NextRequest) {
         message: 'Paciente cadastrado com sucesso',
         patient,
       },
-      { status: 201 }
+      { status: 201, headers: corsHeaders }
     );
     
   } catch (error) {
@@ -191,7 +203,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    });
+    }, { headers: corsHeaders });
     
   } catch (error) {
     console.error('Erro ao listar pacientes:', error);
@@ -203,7 +215,7 @@ export async function GET(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

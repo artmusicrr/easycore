@@ -17,6 +17,18 @@ const loginSchema = z.object({
   two_factor_code: z.string().optional(),
 });
 
+// Headers CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// Handler OPTIONS para CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -29,7 +41,7 @@ export async function POST(request: NextRequest) {
           error: 'Dados inválidos',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
     
@@ -43,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
     
@@ -64,7 +76,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
     
@@ -76,7 +88,7 @@ export async function POST(request: NextRequest) {
             error: 'Código 2FA necessário',
             requires_2fa: true,
           },
-          { status: 403 }
+          { status: 403, headers: corsHeaders }
         );
       }
       
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         role: user.role,
       },
-    });
+    }, { headers: corsHeaders });
     
   } catch (error) {
     console.error('Erro no login:', error);
@@ -123,7 +135,7 @@ export async function POST(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

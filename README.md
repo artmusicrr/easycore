@@ -1,13 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# EasyFront
 
-## Getting Started
+Frontend do sistema de gestão odontológica.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Com Docker
 
 ```bash
+# Copiar variáveis de ambiente
+cp .env.example .env
+
+# Subir o container
+docker compose up -d
+
+# Ver logs
+docker compose logs -f
+
+# Parar
+docker compose down
+```
+
+O frontend estará disponível em: **http://localhost:3001**
+
+### Desenvolvimento Local
+
+```bash
+npm install
 npm run dev
-# or
-yarn dev
+```
+
+## 📋 Variáveis de Ambiente
+
+- `NEXT_PUBLIC_API_URL`: URL da API do backend (padrão: http://localhost:4003/api)
+- `FRONTEND_PORT`: Porta do frontend (padrão: 3001)
+
+## 🔧 Tecnologias
+
+- Next.js 14
+- TypeScript
+- TailwindCSS
+- React Query
+- Axios
+- React Hook Form
+- Zod
+
+## 📦 Build
+
+```bash
+# Build local
+npm run build
+
+# Build Docker
+docker compose build
+```
 # or
 pnpm dev
 # or

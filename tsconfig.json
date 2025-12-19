@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "compilerOptions": {
         "lib": [
@@ -37,3 +38,67 @@
         "prisma.config.ts"
     ]
 }
+=======
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/services/*": [
+        "./services/*"
+      ],
+      "@/services": [
+        "./services/index"
+      ],
+      "@/schemas/*": [
+        "./schemas/*"
+      ],
+      "@/schemas": [
+        "./schemas/index"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/hooks/*": [
+        "./hooks/*"
+      ],
+      "@/utils/*": [
+        "./utils/*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+>>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c

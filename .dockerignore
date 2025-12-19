@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules
 .next
 .git
@@ -15,3 +16,52 @@ coverage
 .idea
 prisma.config.ts
 jsconfig.json
+=======
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next
+out
+
+# Production
+build
+dist
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output
+
+# Git
+.git
+.gitignore
+README.md
+>>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c

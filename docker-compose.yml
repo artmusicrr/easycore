@@ -1,0 +1,30 @@
+# ================================
+# EasyFront - Docker Compose
+# Frontend Next.js
+# ================================
+
+services:
+  # --------------------------------
+  # EasyFront (Next.js Frontend)
+  # --------------------------------
+  easyfront:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: easyfront
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4003/api}
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    networks:
+      - easyfront-network
+
+# --------------------------------
+# Networks
+# --------------------------------
+networks:
+  easyfront-network:
+    driver: bridge
+    name: easyfront-network

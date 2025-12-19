@@ -20,7 +20,10 @@ WORKDIR /app
 
 RUN apk add --no-cache libc6-compat openssl
 
-COPY --from=deps /app/node_modules ./node_modules
+# Copiar package.json e instalar TODAS as dependências (incluindo dev)
+COPY package.json package-lock.json* ./
+RUN npm ci
+
 COPY . .
 
 # Gerar cliente Prisma

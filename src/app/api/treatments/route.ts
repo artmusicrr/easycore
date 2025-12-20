@@ -27,37 +27,37 @@ const createTreatmentSchema = z.object({
   dentista_id: z.string().uuid('ID do dentista inválido').optional(),
   descricao: z.string().min(5, 'Descrição deve ter no mínimo 5 caracteres'),
   valor_total: z.number().positive('Valor deve ser positivo'),
-  data_inicio: z.string().datetime().optional(),
+  data_inicio: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       );
     }
-    
+
     const body = await request.json();
-    
+
     // Validar dados
     const validation = createTreatmentSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
           details: validation.error.errors,
         },
         { status: 400 }
       );
     }
-    
+
     const { patient_id, dentista_id, descricao, valor_total, data_inicio } = validation.data;
-    
+
     // Usar dentista_id fornecido ou o usuário atual se for dentista
     let finalDentistaId = dentista_id;
     if (!finalDentistaId) {
@@ -70,31 +70,31 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    
+
     // Verificar se paciente existe
     const patient = await prisma.patient.findUnique({
       where: { id: patient_id },
     });
-    
+
     if (!patient) {
       return NextResponse.json(
         { error: 'Paciente não encontrado' },
         { status: 404 }
       );
     }
-    
+
     // Verificar se dentista existe e tem role correto
     const dentista = await prisma.user.findUnique({
       where: { id: finalDentistaId },
     });
-    
+
     if (!dentista || dentista.role !== 'dentista') {
       return NextResponse.json(
         { error: 'Dentista não encontrado ou usuário não é dentista' },
         { status: 404 }
       );
     }
-    
+
     // Criar tratamento
     const treatment = await prisma.treatment.create({
       data: {
@@ -123,10 +123,10 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    
+
     // Calcular risco inicial
     await updateTreatmentRisk(treatment.id);
-    
+
     // Registrar auditoria
     await createAuditLog({
       userId,
@@ -138,26 +138,26 @@ export async function POST(request: NextRequest) {
         valor_total,
       },
     });
-    
+
     return NextResponse.json(
-      { 
+      {
         message: 'Tratamento criado com sucesso',
         treatment,
       },
-      { status: 201 }
+      { status: 201, headers: corsHeaders }
     );
-    
+
   } catch (error) {
     console.error('Erro ao criar tratamento:', error);
-    
+
     const errorProtocol = Math.floor(10000 + Math.random() * 90000);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -167,48 +167,36 @@ export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       );
     }
-    
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
     const patientId = searchParams.get('patient_id');
-    const search = searchParams.get('search');
-    
+
     // Construir filtros
-    const where: Record<string, any> = {};
-    
+    const where: Record<string, unknown> = {};
+
     // Dentistas só veem seus próprios tratamentos
     if (userRole === 'dentista') {
       where.dentista_id = userId;
     }
-    
+
     if (status) {
       where.status = status;
     }
-    
+
     if (patientId) {
       where.patient_id = patientId;
     }
 
-    if (search) {
-      where.OR = [
-        { descricao: { contains: search, mode: 'insensitive' } },
-        { 
-          patient: { 
-            nome: { contains: search, mode: 'insensitive' } 
-          } 
-        }
-      ];
-    }
-    
     const [treatments, total] = await Promise.all([
       prisma.treatment.findMany({
         where,
@@ -232,7 +220,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.treatment.count({ where }),
     ]);
-    
+
     return NextResponse.json({
       treatments,
       pagination: {
@@ -242,14 +230,14 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     }, { headers: corsHeaders });
-    
+
   } catch (error) {
     console.error('Erro ao listar tratamentos:', error);
-    
+
     const errorProtocol = Math.floor(10000 + Math.random() * 90000);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },

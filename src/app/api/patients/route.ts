@@ -33,30 +33,30 @@ const createPatientSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       );
     }
-    
+
     const body = await request.json();
-    
+
     // Validar dados
     const validation = createPatientSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
           details: validation.error.errors,
         },
         { status: 400, headers: corsHeaders }
       );
     }
-    
+
     const { nome, telefone, cpf, email, consentimento_lgpd } = validation.data;
-    
+
     // Verificar consentimento LGPD
     if (!consentimento_lgpd) {
       return NextResponse.json(
@@ -64,28 +64,28 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Criptografar CPF
     const cpf_encrypted = encrypt(cpf.replace(/\D/g, ''));
-    
+
     // Verificar se CPF já existe
     const existingPatient = await prisma.patient.findUnique({
       where: { cpf_encrypted },
     });
-    
+
     if (existingPatient) {
       return NextResponse.json(
         { error: 'CPF já cadastrado' },
         { status: 409 }
       );
     }
-    
+
     // Verificar email duplicado
     if (email) {
       const existingEmail = await prisma.patient.findUnique({
         where: { email },
       });
-      
+
       if (existingEmail) {
         return NextResponse.json(
           { error: 'Email já cadastrado' },
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    
+
     // Criar paciente
     const patient = await prisma.patient.create({
       data: {
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         data_cadastro: true,
       },
     });
-    
+
     // Registrar auditoria
     await createAuditLog({
       userId,
@@ -123,22 +123,22 @@ export async function POST(request: NextRequest) {
         // Não logar CPF por segurança
       },
     });
-    
+
     return NextResponse.json(
-      { 
+      {
         message: 'Paciente cadastrado com sucesso',
         patient,
       },
       { status: 201, headers: corsHeaders }
     );
-    
+
   } catch (error) {
     console.error('Erro ao cadastrar paciente:', error);
-    
+
     const errorProtocol = Math.floor(10000 + Math.random() * 90000);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
@@ -151,29 +151,29 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       );
     }
-    
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search');
-    
+
     // Construir filtros
     const where: Record<string, unknown> = {};
-    
+
     if (search) {
       where.OR = [
         { nome: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
       ];
     }
-    
+
     const [patients, total] = await Promise.all([
       prisma.patient.findMany({
         where,
@@ -187,6 +187,14 @@ export async function GET(request: NextRequest) {
           _count: {
             select: { treatments: true },
           },
+          treatments: {
+            select: {
+              descricao: true,
+              status: true
+            },
+            orderBy: { created_at: 'desc' },
+            take: 3
+          }
         },
         orderBy: { nome: 'asc' },
         skip: (page - 1) * limit,
@@ -194,7 +202,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.patient.count({ where }),
     ]);
-    
+
     return NextResponse.json({
       patients,
       pagination: {
@@ -204,14 +212,14 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     }, { headers: corsHeaders });
-    
+
   } catch (error) {
     console.error('Erro ao listar pacientes:', error);
-    
+
     const errorProtocol = Math.floor(10000 + Math.random() * 90000);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },

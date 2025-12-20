@@ -30,19 +30,26 @@ const corsHeaders = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Permitir requisições OPTIONS (CORS preflight) sem autenticação
+  // Preflight-request
   if (request.method === 'OPTIONS') {
     return NextResponse.json({}, { headers: corsHeaders });
   }
 
-  // Ignorar rotas que não são API
+  // Se não for API, segue normal
   if (!pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 
-  // Permitir rotas públicas
+  // Diagnóstico
+  console.log(`[API Request] Method: ${request.method} Path: ${pathname}`);
+
+  // Permitir rotas públicas e injetar CORS na resposta
   if (publicRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
   }
 
   // Verificar token JWT
@@ -51,10 +58,7 @@ export async function middleware(request: NextRequest) {
 
   if (!token) {
     return NextResponse.json(
-      {
-        error: 'Token de autenticação não fornecido',
-        code: 'AUTH_TOKEN_MISSING',
-      },
+      { error: 'Token não fornecido', code: 'AUTH_TOKEN_MISSING' },
       { status: 401, headers: corsHeaders }
     );
   }
@@ -63,38 +67,39 @@ export async function middleware(request: NextRequest) {
 
   if (!payload) {
     return NextResponse.json(
-      {
-        error: 'Token inválido ou expirado',
-        code: 'AUTH_TOKEN_INVALID',
-      },
+      { error: 'Token inválido', code: 'AUTH_TOKEN_INVALID' },
       { status: 401, headers: corsHeaders }
     );
   }
 
-  // Verificar role para rotas admin
+  // Role admin
   if (adminRoutes.some(route => pathname.startsWith(route))) {
     if (payload.role !== 'admin') {
       return NextResponse.json(
-        {
-          error: 'Acesso negado. Requer permissão de administrador.',
-          code: 'AUTH_ADMIN_REQUIRED',
-        },
+        { error: 'Admin requerido', code: 'AUTH_ADMIN_REQUIRED' },
         { status: 403, headers: corsHeaders }
       );
     }
   }
 
-  // Adicionar informações do usuário aos headers para uso nas rotas
+  // Injetar headers de usuário e garantir CORS na resposta final
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-user-id', payload.userId);
   requestHeaders.set('x-user-email', payload.email);
   requestHeaders.set('x-user-role', payload.role);
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // Aplicar CORS em todas as respostas de API (inclusive sucessos/erros das rotas)
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+
+  return response;
 }
 
 export const config = {

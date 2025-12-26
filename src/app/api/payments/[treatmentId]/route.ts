@@ -15,13 +15,6 @@ export async function GET(
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
     
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
-    
     const { treatmentId } = params;
     
     // Verificar se tratamento existe
@@ -69,7 +62,7 @@ export async function GET(
     const balance = await getTreatmentBalance(treatmentId);
     
     // Agrupar por forma de pagamento
-    const porFormaPagamento = payments.reduce((acc, payment) => {
+    const porFormaPagamento = payments.reduce((acc: Record<string, { quantidade: number; total: number }>, payment: any) => {
       const forma = payment.forma_pagamento;
       if (!acc[forma]) {
         acc[forma] = { quantidade: 0, total: 0 };

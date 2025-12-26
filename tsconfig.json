@@ -25,28 +25,28 @@
     ],
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
       ],
       "@/services/*": [
-        "./services/*"
+        "./src/services/*"
       ],
       "@/services": [
-        "./services/index"
+        "./src/services/index"
       ],
       "@/schemas/*": [
-        "./schemas/*"
+        "./src/schemas/*"
       ],
       "@/schemas": [
-        "./schemas/index"
+        "./src/schemas/index"
       ],
       "@/components/*": [
-        "./components/*"
+        "./src/components/*"
       ],
       "@/hooks/*": [
-        "./hooks/*"
+        "./src/hooks/*"
       ],
       "@/utils/*": [
-        "./utils/*"
+        "./src/utils/*"
       ]
     }
   },
@@ -60,10 +60,3 @@
     "node_modules"
   ]
 }
-
-
-
-
-
-
-

@@ -16,13 +16,6 @@ export async function GET(
     const userId = request.headers.get("x-user-id");
     const userRole = request.headers.get("x-user-role");
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
-    }
-
     const { id } = params;
 
     // Buscar tratamento
@@ -121,13 +114,6 @@ export async function PUT(
   try {
     const userId = request.headers.get("x-user-id");
     const userRole = request.headers.get("x-user-role");
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
-    }
 
     const { id } = params;
     const body = await request.json();

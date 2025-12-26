@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { 
@@ -10,7 +10,8 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
-  DollarSign
+  DollarSign,
+  Loader2
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -28,28 +29,87 @@ import {
 } from 'recharts'
 import { formatCurrency } from '@/utils/utils'
 
-// Dados estáticos para design inicial (serão substituídos por chamadas de API)
-const STATS = [
-  { label: 'Pacientes Ativos', value: '124', icon: Users, trend: '+12%', color: 'text-primary-600', bg: 'bg-primary-50' },
-  { label: 'Tratamentos Abertos', value: '45', icon: Stethoscope, trend: '+5%', color: 'text-accent-600', bg: 'bg-accent-50' },
-  { label: 'Receita Mensal', value: 'R$ 42.400', icon: TrendingUp, trend: '+18%', color: 'text-green-600', bg: 'bg-green-50' },
-  { label: 'Índice de Risco', value: '12%', icon: AlertCircle, trend: '-2%', color: 'text-amber-600', bg: 'bg-amber-50' },
-]
-
-const CHART_DATA = [
-  { name: 'Jan', receita: 32000, atendimentos: 80 },
-  { name: 'Fev', receita: 38000, atendimentos: 95 },
-  { name: 'Mar', receita: 45000, atendimentos: 110 },
-  { name: 'Abr', receita: 42400, atendimentos: 105 },
-]
-
-const RECENT_TREATMENTS = [
-  { id: '1', patient: 'Maria Oliveira', treatment: 'Canal', status: 'aberto', risk: 'baixo', value: 1500 },
-  { id: '2', patient: 'João Silva', treatment: 'Limpeza', status: 'pago', risk: 'baixo', value: 200 },
-  { id: '3', patient: 'Carlos Santos', treatment: 'Implante', status: 'atrasado', risk: 'critico', value: 5000 },
-]
+interface DashboardStats {
+  activePatients: number
+  openTreatments: number
+  monthlyRevenue: number
+  riskIndex: number
+  chartData: Array<{
+    name: string
+    receita: number
+    atendimentos: number
+  }>
+  recentTreatments: Array<{
+    id: string
+    patient: string
+    treatment: string
+    status: string
+    risk: string
+    value: number
+  }>
+}
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchDashboardStats() {
+      try {
+        const response = await fetch('/api/dashboard/stats', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar dados do dashboard')
+        }
+
+        const data = await response.json()
+        setStats(data)
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err)
+        setError(err instanceof Error ? err.message : 'Erro desconhecido')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardStats()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-secondary-600">Carregando dados do dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
+          <p className="text-red-600 font-semibold mb-2">Erro ao carregar dados</p>
+          <p className="text-secondary-600 text-sm">{error || 'Dados não disponíveis'}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const STATS = [
+    { label: 'Pacientes Ativos', value: stats.activePatients.toString(), icon: Users, color: 'text-primary-600', bg: 'bg-primary-50' },
+    { label: 'Tratamentos Abertos', value: stats.openTreatments.toString(), icon: Stethoscope, color: 'text-accent-600', bg: 'bg-accent-50' },
+    { label: 'Receita Mensal', value: formatCurrency(stats.monthlyRevenue), icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Índice de Risco', value: `${stats.riskIndex.toFixed(0)}%`, icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50' },
+  ]
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -70,7 +130,6 @@ export default function DashboardPage() {
                 <p className="text-sm font-medium text-secondary-500">{stat.label}</p>
                 <div className="flex items-baseline space-x-2">
                   <h3 className="text-2xl font-bold text-secondary-900">{stat.value}</h3>
-                  <span className="text-xs font-semibold text-green-600">{stat.trend}</span>
                 </div>
               </div>
             </div>
@@ -83,13 +142,14 @@ export default function DashboardPage() {
         <Card title="Evolução de Receita" description="Acompanhamento mensal da receita bruta da clínica">
           <div className="h-[300px] w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={CHART_DATA}>
+              <BarChart data={stats.chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val/1000}k`} />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  formatter={(value: number | undefined) => [formatCurrency(value || 0), 'Receita']}
                 />
                 <Bar dataKey="receita" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
@@ -100,12 +160,13 @@ export default function DashboardPage() {
         <Card title="Atendimentos Mensais" description="Volume de atendimentos realizados por mês">
           <div className="h-[300px] w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={CHART_DATA}>
+              <LineChart data={stats.chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <Tooltip 
                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                   formatter={(value: number | undefined) => [value || 0, 'Atendimentos']}
                 />
                 <Line type="monotone" dataKey="atendimentos" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }} activeDot={{ r: 6, strokeWidth: 0 }} />
               </LineChart>
@@ -130,7 +191,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-secondary-50">
-                  {RECENT_TREATMENTS.map((item) => (
+                  {stats.recentTreatments.map((item) => (
                     <tr key={item.id} className="hover:bg-secondary-50/50 transition-colors">
                       <td className="py-4 pl-0 font-medium text-secondary-900">{item.patient}</td>
                       <td className="py-4 text-secondary-600">{item.treatment}</td>

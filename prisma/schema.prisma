@@ -84,10 +84,11 @@ model Treatment {
   updated_at           DateTime        @updatedAt
 
   // Relações
-  patient  Patient            @relation(fields: [patient_id], references: [id])
-  dentista User               @relation("DentistaTreatments", fields: [dentista_id], references: [id])
-  payments Payment[]
-  sessions TreatmentSession[]
+  patient      Patient            @relation(fields: [patient_id], references: [id])
+  dentista     User               @relation("DentistaTreatments", fields: [dentista_id], references: [id])
+  payments     Payment[]
+  sessions     TreatmentSession[]
+  payment_plan PaymentPlan?
 
   @@map("treatments")
   @@schema("easy")
@@ -107,6 +108,7 @@ enum TreatmentStatus {
 model Payment {
   id               String        @id @default(uuid())
   treatment_id     String
+  installment_id   String?       // Opcional: Vincula a uma parcela
   valor_pago       Decimal       @db.Decimal(10, 2)
   data             DateTime      @default(now())
   forma_pagamento  PaymentMethod
@@ -116,10 +118,66 @@ model Payment {
   created_at       DateTime      @default(now())
 
   // Relações
-  treatment    Treatment @relation(fields: [treatment_id], references: [id])
-  recebido_por User      @relation("ReceivedPayments", fields: [recebido_por_id], references: [id])
+  treatment    Treatment    @relation(fields: [treatment_id], references: [id])
+  recebido_por User         @relation("ReceivedPayments", fields: [recebido_por_id], references: [id])
+  installment  Installment? @relation(fields: [installment_id], references: [id])
 
   @@map("payments")
+  @@schema("easy")
+}
+
+model PaymentPlan {
+  id              String            @id @default(uuid())
+  treatment_id    String            @unique
+  total_parcelas  Int               // Máximo 24
+  valor_parcela   Decimal           @db.Decimal(10, 2)
+  data_inicio     DateTime
+  dia_vencimento  Int               // 1-28
+  status          PlanStatus        @default(ativo)
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+
+  // Relações
+  treatment    Treatment     @relation(fields: [treatment_id], references: [id])
+  installments Installment[]
+
+  @@map("payment_plans")
+  @@schema("easy")
+}
+
+enum PlanStatus {
+  ativo
+  concluido
+  cancelado
+
+  @@schema("easy")
+}
+
+model Installment {
+  id              String            @id @default(uuid())
+  payment_plan_id String
+  numero_parcela  Int
+  valor_esperado  Decimal           @db.Decimal(10, 2)
+  valor_pago      Decimal           @default(0) @db.Decimal(10, 2)
+  data_vencimento DateTime
+  data_pagamento  DateTime?
+  status          InstallmentStatus @default(em_aberto)
+  is_calote       Boolean           @default(false)
+
+  // Relações
+  payment_plan PaymentPlan @relation(fields: [payment_plan_id], references: [id])
+  payments     Payment[]
+
+  @@map("installments")
+  @@schema("easy")
+}
+
+enum InstallmentStatus {
+  paga
+  atrasada
+  em_aberto
+  negociada
+
   @@schema("easy")
 }
 

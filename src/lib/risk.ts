@@ -14,9 +14,9 @@ export interface RiskFactors {
 
 /**
  * Calcula o risco de inadimplência de um tratamento
- * PLACEHOLDER: Em produção, substituir por modelo de IA
+ * Baseado em parcelas atrasadas, tempo de atraso e pagamentos de valor 0.
  * 
- * @returns Valor entre 0 (baixo risco) e 1 (alto risco)
+ * @returns Valor entre 0 (baixo risco) e 100 (alto risco)
  */
 export async function calculateRiskScore(treatmentId: string): Promise<number> {
   try {
@@ -24,13 +24,9 @@ export async function calculateRiskScore(treatmentId: string): Promise<number> {
       where: { id: treatmentId },
       include: {
         payments: true,
-        patient: {
+        payment_plan: {
           include: {
-            treatments: {
-              include: {
-                payments: true,
-              },
-            },
+            installments: true,
           },
         },
       },
@@ -40,55 +36,58 @@ export async function calculateRiskScore(treatmentId: string): Promise<number> {
       throw new Error('Tratamento não encontrado');
     }
 
-    // Fatores de risco básicos
+    let riskScore = 0;
+
+    // 1. Percentual de valor pago (Peso: 25%)
     const valorTotal = Number(treatment.valor_total);
     const valorPago = Number(treatment.valor_pago_total);
-    const paymentPercentage = valorTotal > 0 ? valorPago / valorTotal : 0;
-    
-    // Dias desde o início do tratamento
-    const daysSinceStart = Math.floor(
-      (Date.now() - treatment.data_inicio.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    
-    // Frequência de pagamentos esperada (exemplo: 1 pagamento a cada 30 dias)
-    const expectedPayments = Math.floor(daysSinceStart / 30);
-    const actualPayments = treatment.payments.length;
-    
-    // Histórico do paciente em outros tratamentos
-    const patientTreatments = treatment.patient.treatments;
-    const completedTreatments = patientTreatments.filter(t => t.status === 'pago').length;
-    const totalTreatments = patientTreatments.length;
-    const patientHistory = totalTreatments > 1 
-      ? completedTreatments / (totalTreatments - 1) 
-      : 0.5; // Sem histórico = risco médio
-    
-    // Cálculo do score (fórmula simplificada)
-    // Em produção, usar modelo de ML treinado
-    let riskScore = 0;
-    
-    // Peso 1: Percentual não pago (40%)
-    riskScore += (1 - paymentPercentage) * 0.4;
-    
-    // Peso 2: Atraso em pagamentos (30%)
-    if (expectedPayments > 0) {
-      const paymentDelay = Math.max(0, 1 - (actualPayments / expectedPayments));
-      riskScore += paymentDelay * 0.3;
+    const unpaidPercentage = valorTotal > 0 ? (valorTotal - valorPago) / valorTotal : 0;
+    riskScore += unpaidPercentage * 25;
+
+    // Se houver plano de parcelamento, o cálculo é mais preciso
+    if (treatment.payment_plan) {
+      const installments = treatment.payment_plan.installments;
+      const overdueInstallments = installments.filter(i => i.status === 'atrasada');
+      const zeroPayments = treatment.payments.filter(p => Number(p.valor_pago) === 0).length;
+
+      // 2. Número de parcelas atrasadas (Peso: 35%)
+      // Máximo de 24 parcelas. 5 ou mais atrasadas = risco máximo nesse critério.
+      const overdueRatio = Math.min(overdueInstallments.length / 5, 1);
+      riskScore += overdueRatio * 35;
+
+      // 3. Tempo médio de atraso (Peso: 25%)
+      if (overdueInstallments.length > 0) {
+        const now = new Date();
+        const totalDelayDays = overdueInstallments.reduce((sum, inst) => {
+          const delay = Math.floor((now.getTime() - inst.data_vencimento.getTime()) / (1000 * 60 * 60 * 24));
+          return sum + Math.max(0, delay);
+        }, 0);
+        
+        const avgDelay = totalDelayDays / overdueInstallments.length;
+        // 60 dias de atraso médio = risco máximo nesse critério
+        const delayRatio = Math.min(avgDelay / 60, 1);
+        riskScore += delayRatio * 25;
+      }
+
+      // 4. Histórico de pagamentos com valor 0 (Peso: 15%)
+      // 3 ou mais pagamentos zero = risco máximo nesse critério
+      const zeroRatio = Math.min(zeroPayments / 3, 1);
+      riskScore += zeroRatio * 15;
+      
+    } else {
+      // Se não houver plano, usar lógica genérica (Peso total: 100% no percentual não pago ou status)
+      riskScore = unpaidPercentage * 80;
+      if (treatment.status === 'atrasado') {
+        riskScore += 20;
+      }
     }
-    
-    // Peso 3: Histórico do paciente (20%)
-    riskScore += (1 - patientHistory) * 0.2;
-    
-    // Peso 4: Status do tratamento (10%)
-    if (treatment.status === 'atrasado') {
-      riskScore += 0.1;
-    }
-    
-    // Limitar entre 0 e 1
-    return Math.min(1, Math.max(0, riskScore));
+
+    // Limitar entre 0 e 100
+    return Math.min(100, Math.max(0, Math.round(riskScore)));
     
   } catch (error) {
     console.error('Erro ao calcular risco:', error);
-    return 0.5; // Retorna risco médio em caso de erro
+    return 50; // Retorna risco médio (50) em caso de erro
   }
 }
 

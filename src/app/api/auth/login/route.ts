@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    return NextResponse.json({
+    // Criar resposta com cookie
+    const response = NextResponse.json({
       message: 'Login realizado com sucesso',
       token,
       user: {
@@ -124,6 +125,17 @@ export async function POST(request: NextRequest) {
         role: user.role,
       },
     }, { headers: corsHeaders });
+    
+    // Definir cookie httpOnly
+    response.cookies.set('easycore.token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      path: '/',
+    });
+    
+    return response;
     
   } catch (error) {
     console.error('Erro no login:', error);

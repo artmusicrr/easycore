@@ -5,33 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { encrypt, maskCPF } from '@/lib/crypto';
-
-// Headers CORS
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = request.headers.get('x-user-id');
     const { id } = params;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
 
     // Buscar paciente com tratamentos
     const patientRaw = await prisma.patient.findUnique({
@@ -59,7 +39,7 @@ export async function GET(
     if (!patientRaw) {
       return NextResponse.json(
         { error: 'Paciente não encontrado' },
-        { status: 404, headers: corsHeaders }
+        { status: 404 }
       );
     }
 
@@ -85,7 +65,7 @@ export async function GET(
     if (has_overdue) status_geral = 'inadimplente';
     else if (patientRaw.treatments.length > 0 && valor_total > 0 && valor_total <= valor_pago) status_geral = 'quitado';
     else if (patientRaw.treatments.length === 0) status_geral = 'novo';
-    else status_geral = 'em_tratamento'; // Tem tratamentos, não tá atrasado, mas não acabou de pagar
+    else status_geral = 'em_tratamento';
 
     // Pegar último tratamento para infos de dentista e descrição
     const lastTreatment = patientRaw.treatments[0];
@@ -96,7 +76,7 @@ export async function GET(
       telefone: patientRaw.telefone,
       email: patientRaw.email,
       data_cadastro: patientRaw.data_cadastro,
-      cpf_encrypted: patientRaw.cpf_encrypted, // Frontend deve mascarar/descriptografar se tiver permissão
+      cpf_encrypted: patientRaw.cpf_encrypted,
       consentimento_lgpd: patientRaw.consentimento_lgpd,
 
       // Campos calculados
@@ -109,20 +89,17 @@ export async function GET(
       descricao_ultimo_tratamento: lastTreatment?.descricao || 'Nenhum tratamento',
       dentista: lastTreatment?.dentista?.nome || 'N/A',
 
-      // Tratamentos (opcional, já que pode ser pego em outra rota, mas ajuda na visualização rápida)
+      // Tratamentos
       treatments_count: patientRaw._count.treatments
     };
 
-    return NextResponse.json(
-      { patient },
-      { headers: corsHeaders }
-    );
+    return NextResponse.json({ patient });
 
   } catch (error) {
     console.error('Erro ao buscar paciente:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

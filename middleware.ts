@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
     
     // Fallback para cookie se não houver header (chamadas do navegador)
     if (!token) {
-      token = request.cookies.get('easycore.token')?.value
+      token = request.cookies.get('easycore.token')?.value ?? null
     }
 
     if (!token) {

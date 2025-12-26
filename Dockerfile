@@ -12,7 +12,7 @@ RUN apk add --no-cache libc6-compat openssl
 
 # Copiar arquivos de dependências
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -22,7 +22,7 @@ RUN apk add --no-cache libc6-compat openssl
 
 # Copiar package.json e instalar TODAS as dependências (incluindo dev)
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 

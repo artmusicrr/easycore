@@ -1,9 +1,5 @@
 # ================================
-<<<<<<< HEAD
 # EasyCore Backend - Dockerfile
-=======
-# EasyFront - Dockerfile
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 # Multi-stage build para produção
 # ================================
 
@@ -11,15 +7,10 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-<<<<<<< HEAD
 # Instalar dependências do sistema necessárias para Prisma
 RUN apk add --no-cache libc6-compat openssl
 
 # Copiar arquivos de dependências
-=======
-RUN apk add --no-cache libc6-compat
-
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 COPY package.json package-lock.json* ./
 RUN npm ci --only=production
 
@@ -27,11 +18,7 @@ RUN npm ci --only=production
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-<<<<<<< HEAD
 RUN apk add --no-cache libc6-compat openssl
-=======
-RUN apk add --no-cache libc6-compat
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 
 # Copiar package.json e instalar TODAS as dependências (incluindo dev)
 COPY package.json package-lock.json* ./
@@ -39,12 +26,9 @@ RUN npm ci
 
 COPY . .
 
-<<<<<<< HEAD
 # Gerar cliente Prisma
 RUN npx prisma generate
 
-=======
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 # Build do Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -56,11 +40,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-<<<<<<< HEAD
 RUN apk add --no-cache libc6-compat openssl
-=======
-RUN apk add --no-cache libc6-compat
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 
 # Criar usuário não-root para segurança
 RUN addgroup --system --gid 1001 nodejs
@@ -70,26 +50,17 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-<<<<<<< HEAD
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-=======
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 
 # Definir permissões
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
-<<<<<<< HEAD
 EXPOSE 3333
 
 ENV PORT=3333
-=======
-EXPOSE 3000
-
-ENV PORT=3000
->>>>>>> bdc9cb7f7ba6c3f58044f8598548ea081638752c
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

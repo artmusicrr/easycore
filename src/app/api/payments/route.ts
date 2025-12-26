@@ -10,18 +10,6 @@ import { createAuditLog, AUDIT_ACTIONS } from '@/lib/audit';
 import { updateTreatmentTotalPaid } from '@/lib/payments';
 import { updateTreatmentRisk } from '@/lib/risk';
 
-// Headers CORS
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-// Handler OPTIONS para CORS preflight
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
-
 // Schema de validação
 const createPaymentSchema = z.object({
   treatment_id: z.string().uuid('ID do tratamento inválido'),
@@ -41,14 +29,6 @@ const createPaymentSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
-    
     const body = await request.json();
     
     // Validar dados
@@ -91,7 +71,7 @@ export async function POST(request: NextRequest) {
         treatment_id,
         valor_pago,
         forma_pagamento,
-        recebido_por_id: userId,
+        recebido_por_id: userId!,
         comprovante_url,
         observacao,
       },
@@ -120,7 +100,7 @@ export async function POST(request: NextRequest) {
     
     // Registrar auditoria
     await createAuditLog({
-      userId,
+      userId: userId!,
       acao: AUDIT_ACTIONS.PAYMENT_CREATED,
       detalhes: {
         payment_id: payment.id,
@@ -142,7 +122,7 @@ export async function POST(request: NextRequest) {
           saldo_devedor: Number(treatment.valor_total) - newTotalPaid,
         },
       },
-      { status: 201, headers: corsHeaders }
+      { status: 201 }
     );
     
   } catch (error) {
@@ -155,7 +135,7 @@ export async function POST(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }
@@ -163,15 +143,6 @@ export async function POST(request: NextRequest) {
 // GET /api/payments - Listar pagamentos
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401, headers: corsHeaders }
-      );
-    }
-    
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -227,7 +198,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    }, { headers: corsHeaders });
+    });
     
   } catch (error) {
     console.error('Erro ao listar pagamentos:', error);
@@ -239,7 +210,7 @@ export async function GET(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

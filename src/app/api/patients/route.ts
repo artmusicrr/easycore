@@ -9,18 +9,6 @@ import prisma from '@/lib/prisma';
 import { createAuditLog, AUDIT_ACTIONS } from '@/lib/audit';
 import { encrypt, isValidCPF } from '@/lib/crypto';
 
-// Headers CORS
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-// Handler OPTIONS para CORS preflight
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
-
 // Schema de validação
 const createPatientSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -33,14 +21,6 @@ const createPatientSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
 
     // Validar dados
@@ -51,7 +31,7 @@ export async function POST(request: NextRequest) {
           error: 'Dados inválidos',
           details: validation.error.errors,
         },
-        { status: 400, headers: corsHeaders }
+        { status: 400 }
       );
     }
 
@@ -115,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     // Registrar auditoria
     await createAuditLog({
-      userId,
+      userId: userId!,
       acao: AUDIT_ACTIONS.PATIENT_CREATED,
       detalhes: {
         patient_id: patient.id,
@@ -129,7 +109,7 @@ export async function POST(request: NextRequest) {
         message: 'Paciente cadastrado com sucesso',
         patient,
       },
-      { status: 201, headers: corsHeaders }
+      { status: 201 }
     );
 
   } catch (error) {
@@ -150,15 +130,6 @@ export async function POST(request: NextRequest) {
 // GET /api/patients - Listar pacientes
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -211,7 +182,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    }, { headers: corsHeaders });
+    });
 
   } catch (error) {
     console.error('Erro ao listar pacientes:', error);
@@ -223,7 +194,7 @@ export async function GET(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

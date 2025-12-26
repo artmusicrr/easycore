@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyTokenEdge, extractTokenFromHeader } from './src/lib/jwt-edge'
+import { verifyTokenEdge, extractTokenFromHeader } from './lib/jwt-edge'
 
 // Rotas que requerem autenticação no frontend (Cookies)
 const protectedFrontendRoutes = ['/dashboard', '/patients', '/treatments', '/payments', '/admin']

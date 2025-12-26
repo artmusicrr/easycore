@@ -9,18 +9,6 @@ import prisma from '@/lib/prisma';
 import { createAuditLog, AUDIT_ACTIONS } from '@/lib/audit';
 import { updateTreatmentRisk } from '@/lib/risk';
 
-// Headers CORS
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-// Handler OPTIONS para CORS preflight
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
-
 // Schema de validação
 const createTreatmentSchema = z.object({
   patient_id: z.string().uuid('ID do paciente inválido'),
@@ -34,13 +22,6 @@ export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
 
     const body = await request.json();
 
@@ -61,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Usar dentista_id fornecido ou o usuário atual se for dentista
     let finalDentistaId = dentista_id;
     if (!finalDentistaId) {
-      if (userRole === 'dentista') {
+      if (userRole === 'dentista' && userId) {
         finalDentistaId = userId;
       } else {
         return NextResponse.json(
@@ -129,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     // Registrar auditoria
     await createAuditLog({
-      userId,
+      userId: userId!,
       acao: AUDIT_ACTIONS.TREATMENT_CREATED,
       detalhes: {
         treatment_id: treatment.id,
@@ -144,7 +125,7 @@ export async function POST(request: NextRequest) {
         message: 'Tratamento criado com sucesso',
         treatment,
       },
-      { status: 201, headers: corsHeaders }
+      { status: 201 }
     );
 
   } catch (error) {
@@ -157,7 +138,7 @@ export async function POST(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }
@@ -167,13 +148,6 @@ export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -185,7 +159,7 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {};
 
     // Dentistas só veem seus próprios tratamentos
-    if (userRole === 'dentista') {
+    if (userRole === 'dentista' && userId) {
       where.dentista_id = userId;
     }
 
@@ -229,7 +203,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    }, { headers: corsHeaders });
+    });
 
   } catch (error) {
     console.error('Erro ao listar tratamentos:', error);
@@ -241,7 +215,7 @@ export async function GET(request: NextRequest) {
         error: 'Erro interno do servidor',
         protocol: errorProtocol,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

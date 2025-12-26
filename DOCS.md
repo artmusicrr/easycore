@@ -7,22 +7,20 @@
 1. **Configuração do Ambiente**
    - Criar arquivo `.env` baseado no `.env.example`
 2. **Setup do Banco de Dados**
-   - Gerar Prisma client: `npx prisma generate`
-   - Criar tabelas: `npx prisma db push`
-   - Popular dados iniciais: `npx prisma db seed`
+   - Gerar Prisma client: `npm run prisma:generate`
+   - Criar tabelas/migrations: `npm run prisma:migrate`
+   - Popular dados iniciais: `npm run prisma:seed`
 3. **Iniciar Aplicação**
-   - Executar: `npm run dev`
-   - Acessar: [http://localhost:3333](http://localhost:3333)
+   - Executar localmente: `npm run dev`
+   - Acessar: [http://localhost:4003](http://localhost:4003) (Porta padrão configurada no `package.json`)
 
-### Acesso ao Banco
+### Serviços e Acessos
 
-- **pgAdmin**: [http://localhost:5050](http://localhost:5050)
+- **Aplicação (Backend/Frontend)**: [http://localhost:4003](http://localhost:4003)
+- **pgAdmin (Gestão DB)**: [http://localhost:5050](http://localhost:5050)
   - Login: `admin@admin.com` / `admin`
-
-### Serviços de Infraestrutura
-
-- **EasyPanel**: [http://localhost:3000](http://localhost:3000)
-  - Instalado via: `curl -sSL https://get.easypanel.io | sudo sh`
+- **PostgreSQL**: `localhost:5432`
+  - User: `adm` / Pass: `easysoft` / DB: `db_easy`
 
 ---
 
@@ -51,93 +49,63 @@
 > **Nota:** Os endpoints protegidos requerem header `Authorization: Bearer <token>`
 
 ### Authentication
+- `POST /api/auth/login` - Login com email/senha
+- `POST /api/auth/2fa/verify` - Verificar código 2FA (TOTP)
 
-#### POST /api/auth/login
-```json
-{
-  "email": "admin@easycore.com",
-  "senha": "Admin@123"
-}
-```
-
-#### POST /api/users/register
-```json
-{
-  "nome": "New User",
-  "email": "newuser@example.com",
-  "senha": "Password123",
-  "role": "recepcao"
-}
-```
-- `role`: `recepcao`, `dentista`, `admin`
-
----
+### Users
+- `GET /api/users` - Listar usuários (Admin)
+- `POST /api/users/register` - Criar novo usuário (Admin)
+  - `role`: `recepcao`, `dentista`, `admin`
 
 ### Patients
-
-#### GET /api/patients
-- Query: `?page=1&limit=20&search=nome`
-
-#### POST /api/patients
-```json
-{
-  "nome": "Patient Name",
-  "cpf": "123.456.789-00",
-  "telefone": "11999999999",
-  "email": "patient@example.com",
-  "consentimento_lgpd": true
-}
-```
-
----
+- `GET /api/patients` - Listar pacientes (Busca: `?search=nome`)
+- `POST /api/patients` - Cadastrar novo paciente
+  - Requer: `nome`, `cpf`, `telefone`, `email`, `consentimento_lgpd`
 
 ### Treatments
-
-#### GET /api/treatments
-- Query: `?page=1&limit=20&status=aberto&patient_id=UUID`
-
-#### POST /api/treatments
-```json
-{
-  "patient_id": "[UUID]",
-  "dentista_id": "[UUID]",
-  "descricao": "Root Canal",
-  "valor_total": 500.00,
-  "data_inicio": "2023-12-01T10:00:00Z"
-}
-```
-
-#### GET /api/treatments/[id]
-
-#### PUT /api/treatments/[id]
-```json
-{
-  "descricao": "Updated Description",
-  "valor_total": 600.00,
-  "status": "aberto"
-}
-```
-
----
+- `GET /api/treatments` - Listar tratamentos (Filtros: `?status=aberto&patient_id=UUID`)
+- `POST /api/treatments` - Criar novo tratamento
+- `GET /api/treatments/[id]` - Detalhes do tratamento
+- `PUT /api/treatments/[id]` - Atualizar status/descrição
+- `GET /api/treatments/[id]/risk` - Cálculo de risco (Análise de inadimplência)
 
 ### Payments
+- `POST /api/payments` - Registrar pagamento
+  - `forma_pagamento`: `PIX`, `cartao_credito`, `cartao_debito`, `dinheiro`, `boleto`, `transferencia`
+- `GET /api/payments/[treatmentId]` - Histórico de pagamentos de um tratamento
 
-#### POST /api/payments
-```json
-{
-  "treatment_id": "[UUID]",
-  "valor_pago": 100.00,
-  "forma_pagamento": "PIX",
-  "observacao": "Partial payment"
-}
-```
-- `forma_pagamento`: `PIX`, `cartao_credito`, `cartao_debito`, `dinheiro`, `boleto`, `transferencia`
+### Dashboard
+- `GET /api/dashboard` - Métricas gerais do sistema (Admin/Recepcionista)
 
-#### GET /api/payments/[treatmentId]
+### Dentists
+- `GET /api/dentists` - Listar dentistas ativos
+
+### System
+- `GET /api/health` - Status do sistema e conexão com o banco
 
 ---
 
-### System
+## Estrutura de Seed (Prisma)
 
-#### GET /api/health
-- Health check do sistema e banco de dados
+A estrutura de população do banco de dados (seed) foi modularizada para facilitar a manutenção e garantir a segurança dos dados.
+
+### Arquivos
+- `prisma/seed.ts`: Contém toda a **lógica** de inserção. Gerencia a ordem de criação, hash de senhas e criptografia de CPFs.
+- `prisma/seed-data.ts`: Centraliza todos os **dados** (JSON/Arrays). Facilita a adição de novos usuários, pacientes e tratamentos de teste.
+
+### Fluxo do Seed
+1. **Usuários**: Cria admins, dentistas e recepcionistas. Senhas são hashadas com *bcrypt*.
+2. **Pacientes**: Cadastra pacientes de teste. Os CPFs são automaticamente criptografados usando *AES-256-GCM*.
+3. **Tratamentos**: Vincula pacientes aos dentistas criados.
+4. **Pagamentos**: Registra transações financeiras e atualiza o saldo dos tratamentos.
+5. **Auditoria**: Gera um log final informando o sucesso da operação e estatísticas dos dados inseridos.
+
+---
+
+## Estrutura do Projeto
+
+O projeto utiliza uma estrutura híbrida de **Next.js 14 (App Router)**:
+- `app/`: Contém a interface do usuário (Frontend).
+- `src/app/api/`: Contém a implementação da API RESTful (Backend).
+- `src/lib/`: Lógica de negócio, utilitários, criptografia e cliente Prisma.
+- `prisma/`: Definições do banco de dados e dados de seed.
